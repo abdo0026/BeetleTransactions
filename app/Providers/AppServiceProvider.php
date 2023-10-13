@@ -28,6 +28,6 @@ class AppServiceProvider extends ServiceProvider
 
         $morphMaps = $this->getMorphMap();
         Relation::morphMap($morphMaps);
-        Schema::defaultStringLength(60);
+        Schema::defaultStringLength(125);
     }
 }
