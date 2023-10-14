@@ -16,6 +16,7 @@ class User extends Authenticatable
 
      protected $fillable = [];
      
+     public $relationFilters = [];
 
     protected $hidden = [
         'password',

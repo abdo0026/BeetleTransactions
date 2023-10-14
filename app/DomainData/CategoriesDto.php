@@ -2,14 +2,11 @@
 
 namespace App\DomainData;
 
-trait UserDto {
+trait CategoriesDto {
 
     public function getRules(array $fields = []): array {
         $data = [
             'name' => 'required|string',
-            'email' => 'required|email',
-            'password' => 'required|string',
-            'salt' => 'required|string',
         ];
 
        if(sizeof($fields) == 0) return $data;
@@ -17,7 +14,7 @@ trait UserDto {
     }
 
 
-    public function initializeUserDto(): void {
+    public function initializeCategoriesDto(): void {
         $this->fillable = array_keys($this->getRules());
     }
 }
