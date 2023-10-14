@@ -24,12 +24,6 @@ class LoginRegisterController extends Controller
         private UserRegisterService $userRegisterService,
         private VerifyUserService $verifyUserService,
         private UserLoginService $userLoginService,
-        
-        
-        //private SendVerificationCodeService    $sendVerificationCodeService,
-        //private ResetPasswordService           $resetPasswordService,
-        
-        
     ) {
     }
 

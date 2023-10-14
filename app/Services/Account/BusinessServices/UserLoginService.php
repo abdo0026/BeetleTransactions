@@ -34,7 +34,7 @@ class UserLoginService implements IBusinessService{
     {
         if(!$this->isValid($request, $output)) return;
         $token = $this->user->createToken('Grant Client token')->accessToken;
-        auth()->login($this->user);
+        //auth()->login($this->user);
         $output->user = $this->user;
         $output->token = $token;
         $output->user->setRelations([]);

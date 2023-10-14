@@ -31,16 +31,16 @@ class ForgetPasswordService implements IBusinessService {
     }
 
     public function isValid(array $request, \stdClass &$output): bool {
-        if (strlen($request['email']) > 0){
-            
-            $this->user = $this->userRepository->getByKey('email', $request['email'], ['registerationValidation'])->first();
-            
-            if (is_null($this->user)) {
-                $output->Error = ['Invalid email', 'بريد إلكتروني خاطئ'];
-                return false;
-            }
-            
+    
+        
+        $this->user = $this->userRepository->getByKey('email', $request['email'], ['registerationValidation'])->first();
+        
+        if (is_null($this->user)) {
+            $output->Error = ['Invalid email', 'بريد إلكتروني خاطئ'];
+            return false;
         }
+        
+    
         return true;
     }
 
