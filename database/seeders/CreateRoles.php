@@ -8,13 +8,14 @@ use App\Enum\ROLES;
 use Spatie\Permission\Models\Role;
 
 
-class CreateAdminRole extends Seeder
+class CreateRoles extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
+        Role::firstOrCreate(['name' => ROLES::CUSTOMER]);
         Role::firstOrCreate(['name' => ROLES::ADMIN]);
     }
 }

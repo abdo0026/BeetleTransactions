@@ -6,6 +6,7 @@ use App\Services\IBusinessService;
 use App\Repositories\Repository;
 use App\Services\Account\CrudServices\UserCrudService;
 use App\Services\Account\CrudServices\RegisterationValidationCrudService;
+use App\Services\Role\BusinessServices\AssignCustomerRoleToUserService;
 use App\Events\Account\UserRegisterred;
 use App\Traits\GenerateRandomString;
 use App\Models\User;
@@ -20,7 +21,8 @@ class UserRegisterService implements IBusinessService {
 
     public function __construct(
         private UserCrudService $userCrudService,
-        private RegisterationValidationCrudService $registerationValidationCrudService
+        private RegisterationValidationCrudService $registerationValidationCrudService,
+        private AssignCustomerRoleToUserService $assignCustomerRoleToUserService
     ) {
         $this->userRepository = Repository::getRepository('user');
         $this->user = null;
@@ -46,9 +48,10 @@ class UserRegisterService implements IBusinessService {
         //create registeration Validation
         $request['user_id'] = $output->user->id;
         $this->registerationValidationCrudService->create($request, $output);
+        if (isset($output->Error)) return;
         
-        
-        
+        $this->assignCustomerRoleToUserService->perform(['user' => $output->user], $output);
+
         //raise an event
         UserRegisterred::dispatch($output->user, $output->registeration_validation);
 

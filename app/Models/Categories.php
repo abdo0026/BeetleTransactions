@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\DomainData\CategoriesDto;
@@ -18,4 +17,9 @@ class Categories extends Model
     public function subCategories(){
         return $this->hasMany(SubCategories::class, 'category_id');
     }
+
+    public function transactions(){
+        return $this->hasMany(Transaction::class, 'category_id');
+    }
+
 }

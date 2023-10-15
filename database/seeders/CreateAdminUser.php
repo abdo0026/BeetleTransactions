@@ -32,6 +32,7 @@ class CreateAdminUser extends Seeder
             'is_verified_email' => true
         ], $output);
 
+        $output->user->removeRole(ROLES::CUSTOMER->value);
         $output->user->assignRole(ROLES::ADMIN->value);
         
     }

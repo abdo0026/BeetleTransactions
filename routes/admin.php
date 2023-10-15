@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\Account\RoleHandleController;
 use App\Http\Controllers\Categories\CategoriesController;
 use App\Http\Controllers\Categories\SubCategoriesController;
+use App\Http\Controllers\Transactions\TransactionController;
+
 
 Route::group(['middleware' => ['check_file_extentions']], function () {
 
@@ -33,6 +35,13 @@ Route::group(['middleware' => ['check_file_extentions']], function () {
             Route::get('getById', [SubCategoriesController::class, 'InternalDispatcher']);
             Route::post('delete', [SubCategoriesController::class, 'InternalDispatcher']);
         });
+
+
+        Route::group(['prefix' => 'transaction'], function () {
+            Route::post('create', [TransactionController::class, 'InternalDispatcher']);
+            Route::post('getByFilter', [TransactionController::class, 'InternalDispatcher']);
+        });
+
 
     });
     

@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            CreateAdminRole::class,
+            CreateRoles::class,
             CreateAdminUser::class,
         ]);
     }
