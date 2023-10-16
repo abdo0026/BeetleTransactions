@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Enum\TRANSACTION_STATUS;
+use Carbon\Carbon;
 
 class TransactionRepository extends Repository
 {
@@ -12,4 +14,19 @@ class TransactionRepository extends Repository
                     ->whereIn('status', $statusArray)
                     ->exists();
     }
+
+
+
+    public function UpdateToDueTransactions()
+    {   
+        $today = Carbon::now()->toDateString();
+        $openTransactionsArray = [TRANSACTION_STATUS::OUTSTANDING->value];
+
+        return $this->getModel
+              ->where('due_date', '<', $today)    
+              ->whereIn('status', $openTransactionsArray)
+               ->update(['status' => TRANSACTION_STATUS::OVERDUE->value]);
+    }
+
+
 }

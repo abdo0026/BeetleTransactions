@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Event;
 use App\Events\Account\UserRegisterred;
 use App\Listeners\Account\SendVerificationEmail;
 
+use App\Events\Transactions\PaymentCreated;
+use App\Events\Transactions\PaymentDeleted;
+use App\Listeners\Transactions\CalculateTransactionPaidAmount;
+use App\Listeners\Transactions\EvaluateTransactionStatus;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -21,6 +26,16 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         UserRegisterred::class => [
             SendVerificationEmail::class,
+        ],
+
+        PaymentCreated::class => [
+            CalculateTransactionPaidAmount::class,
+            EvaluateTransactionStatus::class
+        ],
+
+        PaymentDeleted::class => [
+            CalculateTransactionPaidAmount::class,
+            EvaluateTransactionStatus::class
         ],
     ];
 

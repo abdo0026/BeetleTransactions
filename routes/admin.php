@@ -3,12 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Enum\ROLES;
-use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\Account\RoleHandleController;
 use App\Http\Controllers\Categories\CategoriesController;
 use App\Http\Controllers\Categories\SubCategoriesController;
 use App\Http\Controllers\Transactions\TransactionController;
-
+use App\Http\Controllers\Transactions\PaymentController;
 
 Route::group(['middleware' => ['check_file_extentions']], function () {
 
@@ -40,6 +39,13 @@ Route::group(['middleware' => ['check_file_extentions']], function () {
         Route::group(['prefix' => 'transaction'], function () {
             Route::post('create', [TransactionController::class, 'InternalDispatcher']);
             Route::post('getByFilter', [TransactionController::class, 'InternalDispatcher']);
+            Route::post('delete', [TransactionController::class, 'InternalDispatcher']);
+        });
+
+        Route::group(['prefix' => 'payment'], function () {
+            Route::post('create', [PaymentController::class, 'InternalDispatcher']);
+            Route::post('getByFilter', [PaymentController::class, 'InternalDispatcher']);
+            Route::post('delete', [PaymentController::class, 'InternalDispatcher']);
         });
 
 

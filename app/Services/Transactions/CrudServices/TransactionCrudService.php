@@ -7,6 +7,7 @@ use App\Repositories\Repository;
 use App\Models\User;
 use App\Models\Categories;
 use App\Models\SubCategories;
+use App\Models\Transaction;
 use App\Enum\ROLES;
 USE APP\Enum\TRANSACTION_STATUS;
 use Carbon\Carbon;
@@ -33,7 +34,6 @@ class TransactionCrudService extends CrudService{
         //NOTE
         //remaining work on trasactions:
         // make update bussines
-        // make delete transaction by setting status to void (cannot void transactin if it has an payments or its status os paid)
     }
 
     public function isValidCreate(array $request, \stdClass &$output): bool
@@ -93,7 +93,7 @@ class TransactionCrudService extends CrudService{
         }
 
        
-
+       /*
        //due date must not be in past
        $request['due_date'] = Carbon::parse($request['due_date'])->toDateString();
        if($request['due_date'] < Carbon::now()->toDateString())
@@ -101,7 +101,7 @@ class TransactionCrudService extends CrudService{
             $output->Error = ['Due date is specified in the past', 'تم تحديد تاريخ الاستحقاق في الماضي']; 
             return false;
        }
-
+        */
        
        //user must not have any overdue or Outstanding transactions
        $openTransactionStatus = [
@@ -129,12 +129,108 @@ class TransactionCrudService extends CrudService{
         if(!isset($request['status']))
         {
             $request['status'] = TRANSACTION_STATUS::OUTSTANDING->value;
+            
+            if(Carbon::parse($request['due_date'])->toDateString() < Carbon::now()->toDateString()){
+                $request['status'] = TRANSACTION_STATUS::OVERDUE->value;
+            }
+            
+            
         }
+
+        
 
         $request['admin_id'] = auth()->user()->id;
         
         $this->entity = $this->repository->create($request, $related_objects);   
         $output->{$this->entityName} = $this->entity;
+    }
+
+
+
+    public function isValidDelete(array $request, \stdClass &$output): bool
+    {
+        
+        $this->entity = $this->repository->getById($request['id'], ['payments']);
+       
+        //transaction must exist
+        if(is_null($this->entity))
+        {
+            $output->Error = ['Invalid transaction id', 'معرف المعاملة غير صحيح']; 
+            return false;
+        }
+
+        //transaction must not be void or paid
+        if(strcmp($this->entity->status, TRANSACTION_STATUS::VOID->value) === 0)
+        {
+              $output->Error = ['Transaction is already voided', 'تم إبطال المعاملة بالفعل']; 
+              return false;
+        }
+
+        if(strcmp($this->entity->status, TRANSACTION_STATUS::PAID->value) === 0)
+        {
+            $output->Error = ['cannot void a closed transaction', 'لا يمكن إبطال معاملة مغلقة']; 
+            return false;
+        }
+
+        
+        
+        //transaction must nnot have any payment od it
+        if(sizeof($this->entity->payments) > 0)
+        {
+            $output->Error = ['cannot void transaction which have existing payments', 'لا يمكن إبطال المعاملة التي لها دفعات موجودة']; 
+            return false;
+        }
+        
+    
+        return true;
+    }
+
+    public function delete(array $request ,\stdClass &$output) :void
+    {
+        if(!$this->isValidDelete($request, $output)) return;
+        $output->{$this->entityName} = $this->repository->update($this->entity, ['status' => TRANSACTION_STATUS::VOID->value]);
+    }
+
+    public static function getTransactionTotalAmount(Transaction $transaction): float
+    {
+       $amount = $transaction->amount;
+       return $transaction->is_vat_included ? $amount : 
+               $amount += (($transaction->vat_percentage / 100) * $amount);
+
+    }
+
+    public function reCalculateTransactionPaidAmount(Transaction $transaction)
+    {
+           $totalPaidAmount = 0;
+           
+           $payments = $transaction->payments;
+           if(sizeof($payments) > 0)
+           {
+              $totalPaidAmount = $payments->sum('amount');
+           }
+
+           $this->repository->update($transaction, ['paid_amount' => $totalPaidAmount]);
+    }
+
+    public function reCalculateTransactionStatus(Transaction $transaction)
+    {
+        $tolatAmount = self::getTransactionTotalAmount($transaction);
+        $istotalAmountPaid = $transaction->paid_amount == $tolatAmount;
+        
+        //if total Amount is paid chnage status to paid
+        if($istotalAmountPaid)
+        {
+            $this->repository->update($transaction, ['status' => TRANSACTION_STATUS::PAID->value]);
+            return;
+        }
+         
+        //transaction passed due
+        if(strcmp($transaction->status, TRANSACTION_STATUS::OVERDUE->value) !== 0  &&$transaction->due_date < Carbon::now()->toDateString())
+        {
+            $this->repository->update($transaction, ['status' => TRANSACTION_STATUS::OVERDUE->value]);
+            return;
+        }
+
     }
     
 }

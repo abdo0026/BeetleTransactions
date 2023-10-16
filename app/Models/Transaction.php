@@ -31,4 +31,9 @@ class Transaction extends Model
     }
     
 
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
 }
